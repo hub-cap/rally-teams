@@ -1,0 +1,48 @@
+## JVM configuration
+
+-Xms{{heap_size}}
+-Xmx{{heap_size}}
+
+## GC configuration
+
+{%- if use_cms_gc is defined and use_cms_gc == 'true' %}
+-XX:-UseG1GC
+-XX:+UseConcMarkSweepGC
+-XX:CMSInitiatingOccupancyFraction=75
+-XX:+UseCMSInitiatingOccupancyOnly
+{%- endif %}
+
+{%- if use_g1_gc is defined and use_g1_gc == 'true' %}
+-XX:-UseConcMarkSweepGC
+-XX:+UseG1GC
+-XX:G1ReservePercent=25
+-XX:InitiatingHeapOccupancyPercent=30
+{%- endif %}
+
+## heap dumps
+
+# specify an alternative path for heap dumps
+# ensure the directory exists and has sufficient space
+{%- if heap_dump_path is defined %}
+-XX:HeapDumpPath={{heap_dump_path}}
+{%- else %}
+# uset the jvm.options heap dump path to overi
+-XX:HeapDumpPath=
+{%- endif %}
+
+# specify an alternative path for JVM fatal error logs
+{%- if log_path is defined %}
+-XX:ErrorFile={{log_path}}/hs_err_pid%p.log
+{%- else %}
+# uset the jvm.options heap dump path
+-XX:ErrorFile=
+{%- endif %}
+
+{%- if additional_java_settings is defined %}
+{%- for value in additional_java_settings %}
+{{value}}
+{%- endfor %}
+{%- endif %}
+
+# unset the log path so it can be set if telemetry is enabled
+-Xlog:disable
